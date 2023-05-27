@@ -32,25 +32,21 @@ class Gpt4freeProvider:
                                 self.FAILED_PROVIDERS.append(provider)
                                 print(f"Failed to use {provider}")
                                 final_response = None
-                            if (
-                                    response
-                                    == "Unable to fetch the response, Please try again."
-                            ):
+                            if (response == "Unable to fetch the response, Please try again."):
                                 self.FAILED_PROVIDERS.append(provider)
                                 print(f"Failed to use {provider}")
                                 final_response = None
-                            if final_response is None:
-                                final_response = response
                     if final_response:
                         if len(final_response) > 1:
                             return final_response
+                    else:
+                        print(f"Failed to use {provider}")
+                        self.FAILED_PROVIDERS.append(provider)
+                        final_response = None
                 except:
                     print(f"Failed to use {provider}")
                     self.FAILED_PROVIDERS.append(provider)
                     final_response = None
 
-            if len(self.FAILED_PROVIDERS) == len(self.providers):
-                print(
-                    "All providers failed, sleeping for 10 seconds before trying again..."
-                )
-                return
+            if len(self.FAILED_PROVIDERS) >= len(self.providers):
+                raise Exception("All providers failed")
