@@ -1,7 +1,7 @@
 # Discord-Chat-bot 🤖
 
 
-This is a Python-based Discord chat bot that uses the discord.py library. It can respond to messages, change its profile picture, and provide latency information. It also utilizes the `chatbase` model from [OpenGPT](https://github.com/uesleibros/OpenGPT) for generating responses based on conversation history and [Imaginepy](https://github.com/ItsCEED/Imaginepy) for generating midjourney like images.
+This is a Python-based Discord chat bot that uses the discord.py library. It can respond to messages, change its profile picture, and provide latency information. It also utilizes the [Imaginepy](https://github.com/ItsCEED/Imaginepy) for generating midjourney like images.
 
 The bot has various features, including image generation using DALL-E, OCR for images, web access using DuckDuckGo, and YouTube video summarization. It supports hybrid command systems, recognizes mentions, handles messages, and allows for channel-specific responses.
 
@@ -11,7 +11,11 @@ The bot has various features, including image generation using DALL-E, OCR for i
   </a>
 </p>
 
-#### If you want to use `Replit` or `Docker` [check this](https://github.com/mishalhossin/Discord-AI-Chatbot#--other-ways-to-run-)
+#### Please support this project on Patreon. Your donation is crucial for its sustainability. Without your help, the project's future is at risk. Thank you.
+  <a href="https://www.patreon.com/mishalhossin">
+    <img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Dmishalhossin%26type%3Dpatrons&style=for-the-badge">
+  </a>
+</p>
 
 <details>
 <summary><strong>Feature Showcase 👀 (Click to expand)</strong></summary>
@@ -68,23 +72,19 @@ The bot has various features, including image generation using DALL-E, OCR for i
 
 </details>
 
+# Easy Installation with the Installation Helper
 
-# Steps to install and run 🚩 :
+If the following steps seem too daunting for you, don't worry! We have the perfect solution. Introducing our ⚡blazing fast [Installation Helper](https://github.com/mishalhossin/installation-helper)!! (Supports windows and linux) It's like having a tech-savvy genie at your fingertips, ready to grant all your installation wishes. Just remember, if it starts demanding three wishes and a magic lamp, you might be in the wrong folder! <img src="https://cdn.discordapp.com/emojis/929956006363009034.webp?size=96&quality=lossless" alt="Emoji" width="20" height="20">
+
+# Installation steps  🚩 :
 ### Step 1. 🎬 Git clone repository
-
-![image](https://github.com/mishalhossin/Discord-AI-Chatbot/assets/91066601/a5137a58-bc0f-4eea-9927-33d9c0b45a73)
-
 ```
 git clone https://github.com/mishalhossin/Discord-AI-Chatbot
 ```
 ### Step 2. 📁 Changing directory to cloned directory
-
-![image](https://github.com/mishalhossin/Discord-AI-Chatbot/assets/91066601/91af0ef7-0baf-461c-abb9-c715b299615c)
-
 ```
 cd Discord-AI-Chatbot
 ```
-
 ### Step 3. 🔑 Getting discord bot token and enabling intents from [HERE](https://discord.com/developers/applications)
 <details>
 <summary><strong>Read more... ⚠️</strong></summary>
@@ -102,49 +102,28 @@ cd Discord-AI-Chatbot
 
 ### Step 4. 🔑 Get hugging face Access Tokens from [HEREE](https://huggingface.co/settings/tokens)
 ## Read or Write it dosent matter (I use Write)
-![image](https://user-images.githubusercontent.com/91066601/236681615-71600817-774a-430c-8cec-8e6710a82b49.png)
-
 ### Step 5. 🔐 Rename `example.env` to `.env` and put the discord token and hugging face access token. It will look like this:
 ```
 HUGGING_FACE_API=hf_access_token_from_step_4
 DISCORD_TOKEN=token_from_step_3
 ```
-### Step 6. ⚙️ Install all the dependencies
-
-
-![image](https://github.com/mishalhossin/Discord-AI-Chatbot/assets/91066601/30e9b521-299c-4ff2-b21b-febb965fdc0a)
-
-```
-pip install -r requirements.txt
-```
-
-### Step 7. 🚀 Run the bot
-
-![image](https://github.com/mishalhossin/Discord-AI-Chatbot/assets/91066601/e2b5711d-57a9-4f45-8790-2556c46586f4)
-
+### Step 6. 🚀 Run the bot
 ```
 python main.py
 ```
 ### Step 8. Invite the bot
 ![image](https://user-images.githubusercontent.com/91066601/236673317-64a1789c-f6b1-48d7-ba1b-dbb18e7d802a.png)
-
-
-### 🏁 Finally talk to the bot
-#### There are 2 ways to talk to the ai
+#### There are 2 ways to talk to the AI
 - Invite your bot and DM (Direct message) it | ⚠️ Make sure you have DM enabled
 - if you want it in server channel use **/toggleactive** 
 - For more awesome commands use **/help**
-
 ![image](https://github.com/mishalhossin/Discord-AI-Chatbot/assets/91066601/6f26c552-751d-4753-bd17-883baf7ee6d5)
-
 
 # ✨✨✨  Other ways to run ✨✨✨
 ### Using replit to run ☁️
 # [![Try on repl.it](https://img.shields.io/badge/Replit-DD1200?style=for-the-badge&logo=Replit&logoColor=white)](https://repl.it/github/mishalhossin/Discord-AI-Chatbot)
-
-- Follow all the steps except `step 1`
 - Have a replit account
-- Please note `.env` found in secrets tab of replit :
+- Please note `.env` found in`Secrets` from `Tools` tab of replit :
 
 ![image](https://user-images.githubusercontent.com/91066601/235810871-5d4c1469-35fd-42d2-a3a2-3382002877cb.png)
 
@@ -194,7 +173,3 @@ sudo docker-compose up --build
 </a>
 
 ### Crafted with Care: Made with lots of love and attention to detail. ❤️
-  <a href="https://www.patreon.com/mishalhossin">
-    <img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Dmishalhossin%26type%3Dpatrons&style=for-the-badge">
-  </a>
-</p>

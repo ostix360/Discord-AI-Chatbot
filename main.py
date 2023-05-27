@@ -1,13 +1,11 @@
-import json
 import os
 import re
+import json
 import uuid
 from datetime import datetime
 
 import aiohttp
-import asyncio
 import discord
-import httpx
 from discord import Embed, Colour, app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -104,7 +102,7 @@ def split_response(response, max_length=1900):
 async def get_transcript_from_message(message_content):
     def extract_video_id(mess_cont):
         youtube_link_pattern = re.compile(
-            r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/(watch\?v=|embed/|v/|.+\?v=)?([^&=%?]{11})')
+            r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})')
         match = youtube_link_pattern.search(mess_cont)
         return match.group(6) if match else None
 
@@ -121,20 +119,19 @@ async def get_transcript_from_message(message_content):
     formatted_transcript = ". ".join([entry['text'] for entry in translated_transcript.fetch()])
     formatted_transcript = formatted_transcript[:2500]
 
-    response = f"[System: Asisst me by Summarizing the following in 10 bullet points :\n\n{formatted_transcript}\n\n\n. Provide a summary or additional information based on the content.]"
+    response = f"Summarizing the following in 10 bullet points ::\n\n{formatted_transcript}\n\n\n.Provide a summary or additional information based on the content."
 
     return response
-
 
 async def search(prompt):
     if not internet_access:
         return
 
-    wh_words = ['search', 'find', 'who', 'what', 'when', 'where', 'why', 'which', 'whom', 'whose', 'how']
-    first_word = prompt.split()[0].lower()
-
-    if not any(first_word.startswith(wh_word) for wh_word in wh_words):
-        return
+    wh_words = ['search', 'find', 'who', 'what', 'when', 'where', 'why', 'which', 'whom', 'whose', 'how',
+         'is', 'are', 'am', 'can', 'could', 'should', 'would', 'do', 'does', 'did',
+         'may', 'might', 'shall', 'will', 'have', 'has', 'had', 'must', 'ought', 'need',
+         'want', 'like', 'prefer', 'tìm', 'tìm kiếm', 'làm sao', 'khi nào', 'hỏi', 'nào', 'google',
+         'muốn hỏi', 'phải làm', 'cho hỏi']
 
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -144,10 +141,13 @@ async def search(prompt):
             search = await response.json()
 
     blob = f"[System: Search results for '{prompt}' at {current_time}:\n\n"
-    for index, result in enumerate(search):
-        blob += f'[{index}] "{result["snippet"]}"\n\nURL: {result["link"]}\n\nThese links were provided by system not the user so you have send the link to the user\n]'
-    return blob
+    for word in prompt.split():
+        if any(wh_word in word.lower() for wh_word in wh_words):
+            for index, result in enumerate(search):
+                blob += f'[{index}] "{result["snippet"]}"\n\nURL: {result["link"]}\n\nThese links were provided by the system and not the user, so you should send the link to the user.\n]'
+            return blob
 
+    return None
 
 api_key = os.getenv('HUGGING_FACE_API')
 
@@ -157,9 +157,7 @@ API_URLS = [
 ]
 headers = {"Authorization": f"Bearer {api_key}"}
 
-
-
-async def generate_image(image_prompt, style_value, ratio_value):
+async def generate_image(image_prompt, style_value, ratio_value, negative):
     imagine = AsyncImagine()
     filename = str(uuid.uuid4()) + ".png"
     style_enum = Style[style_value]
@@ -167,7 +165,11 @@ async def generate_image(image_prompt, style_value, ratio_value):
     img_data = await imagine.sdprem(
         prompt=image_prompt,
         style=style_enum,
-        ratio=ratio_enum
+        ratio=ratio_enum,
+        priority="1",
+        high_res_results="1",
+        steps="70",
+        negative=negative
     )
     try:
         with open(filename, mode="wb") as img_file:
@@ -180,36 +182,43 @@ async def generate_image(image_prompt, style_value, ratio_value):
 
     return filename
 
-
 async def fetch_response(client, api_url, data):
-    response = await client.post(api_url, headers=headers, data=data, timeout=30)
+    headers = {"Content-Type": "application/json"}
+    async with client.post(api_url, headers=headers, data=data, timeout=20) as response:
+        if response.status != 200:
+            raise Exception(f"API request failed with status code {response.status}: {await response.text()}")
 
-    if response.status_code != 200:
-        raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
+        return await response.json()
 
-    return response.json()
 
 
 async def query(filename):
     with open(filename, "rb") as f:
         data = f.read()
 
-    async with httpx.AsyncClient() as client:
+    async with aiohttp.ClientSession() as client:
         tasks = [fetch_response(client, api_url, data) for api_url in API_URLS]
         responses = await asyncio.gather(*tasks, return_exceptions=True)
 
     return responses
 
 
-async def download_image(image_url, save_as):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(image_url)
-    with open(save_as, "wb") as f:
-        f.write(response.content)
 
+async def download_image(image_url, save_as):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(image_url) as response:
+            with open(save_as, "wb") as f:
+                while True:
+                    chunk = await response.content.read(1024)
+                    if not chunk:
+                        break
+                    f.write(chunk)
+    await session.close()
 
 async def process_image_link(image_url):
-    temp_image = "temp_image.jpg"
+    image_type = image_url.split('.')[-1]
+    image_type = image_type.rsplit('.', 1)[0]
+    temp_image = f"{str(uuid.uuid4())}.{image_type}"
     await download_image(image_url, temp_image)
     output = await query(temp_image)
     os.remove(temp_image)
@@ -231,7 +240,7 @@ async def on_message(message):
     if author_id not in message_history:
         message_history[author_id] = []
 
-    message_history[author_id].append(f"{message.author.name} : {message.content}")
+    message_history[author_id].append({"role": "user", "content": message.content})
     message_history[author_id] = message_history[author_id][-MAX_HISTORY:]
 
     is_replied = message.reference and message.reference.resolved.author == bot.user
@@ -250,7 +259,7 @@ async def on_message(message):
                 if attachment.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', 'webp')):
                     caption = await process_image_link(attachment.url)
                     has_image = True
-                    image_caption = f"""\n[System: Image-to-text models may take time to load, causing timeout errors. Fallback or functional models should be used instead. Captions for the image are categorized as OCR  (1st) that is good for image containing signs or symbols then comes general image detection (2nd), which will be very inaccurate for OCR. Image captions: {caption}]"""
+                    image_caption = f"""Image-to-text models may take time to load, causing timeout errors. Fallback or functional models should be used instead. Captions for the image are categorized as OCR (1st), which is good for images containing signs or symbols, and general image detection (2nd), which will be very inaccurate for OCR. Image captions: {caption}.]"""
                     print(caption)
                     break
 
@@ -263,22 +272,31 @@ async def on_message(message):
 
         search_results = await search(message.content)
         yt_transcript = await get_transcript_from_message(message.content)
-        user_prompt = "\n".join(message_history[author_id])
-
-        prompt = f"{bot_prompt}\n{user_prompt}\n{yt_transcript}\n{image_caption}\n{search_results}\n\n{bot.user.name}:"
-
+        history = message_history[author_id]
+        botname = bot.user.name
+        username = message.author.name
+        messages = [
+            {"role": "system",
+             "content": f"{bot_prompt}. And your name is {botname} and users name is{username}. And only respond in the language the user is speaking, e.g., Vietnamese or English, etc."},
+            *history,
+            {
+                "role": "system",
+                "content": f"The following are the related search results, if any: {search_results}  if its None then user hasnt any questions\n\n" +
+                           f"{yt_transcript} if its None then user hasnt provided it\n\n" +
+                           f"Additionally, here is any attachment captioning: {image_caption} if its None then user hasnt provided it "
+            }
+        ]
         async def generate_response_in_thread(prompt):
-            # temp_message = await message.channel.send(
-            #     "https://cdn.discordapp.com/emojis/1075796965515853955.gif?size=96&quality=lossless")
+            # temp_message = await message.channel.send("https://cdn.discordapp.com/emojis/1075796965515853955.gif?size=96&quality=lossless")
             response = await generate_response(prompt)
-            message_history[author_id].append(f"\n{bot.user.name} : {response}")
+            message_history[author_id].append({"role": "assistant", "content": response})
             chunks = split_response(response)
             for chunk in chunks:
                 await message.reply(chunk)
             # await temp_message.delete()
 
         async with message.channel.typing():
-            asyncio.create_task(generate_response_in_thread(prompt))
+            asyncio.create_task(generate_response_in_thread(messages))
 
 
 @bot.hybrid_command(name="gpt4free", description="Show this message")
@@ -302,12 +320,10 @@ async def pfp(ctx, attachment_url=None):
         async with session.get(attachment_url) as response:
             await bot.user.edit(avatar=await response.read())
 
-
 @bot.hybrid_command(name="ping", description="PONG! Provide bot Latency")
 async def ping(ctx):
     latency = bot.latency * 1000
     await ctx.send(f"Pong! Latency: {latency:.2f} ms")
-
 
 @bot.hybrid_command(name="changeusr", description="Change bot's actual username")
 @commands.is_owner()
@@ -404,18 +420,18 @@ async def bonk(ctx):
     app_commands.Choice(name='4x3', value='RATIO_4X3'),
     app_commands.Choice(name='3x2', value='RATIO_3X2')
 ])
-async def imagine(ctx, prompt: str, style: app_commands.Choice[str], ratio: app_commands.Choice[str]):
-    temp_message = await ctx.send("https://cdn.discordapp.com/emojis/1075796965515853955.gif?size=96&quality=lossless")
-    filename = await generate_image(prompt, style.value, ratio.value)
-    await ctx.send(
-        content=f"Here is the generated image for {ctx.author.mention} \n- Prompt : `{prompt}`\n- Style :`{style.name}`",
-        file=discord.File(filename))
+async def imagine(ctx, prompt: str, style: app_commands.Choice[str], ratio: app_commands.Choice[str], negative: str = None):
+    temp_message = await ctx.send("https://cdn.discordapp.com/emojis/842555048973172756.gif?size=96&quality=lossless")
+    filename = await generate_image(prompt, style.value, ratio.value, negative)
+    if negative is not None:
+        await ctx.send(content=f"Here is the generated image for {ctx.author.mention} \n- Prompt : `{prompt}`\n- Style : `{style.name}`\n- Ratio :`{ratio.value}` \n- Negative : `{negative}`", file=discord.File(filename))
+    else:
+        await ctx.send(content=f"Here is the generated image for {ctx.author.mention} \n- Prompt : `{prompt}`\n- Style : `{style.name}`\n- Ratio :`{ratio.value}`", file=discord.File(filename))
     os.remove(filename)
     await temp_message.edit(content=f"Finished Image Generation")
+    
 
-
-@bot.hybrid_command(name="nekos",
-                    description="Displays a random image or GIF of a neko, waifu, husbando, kitsune, or other actions.")
+@bot.hybrid_command(name="nekos", description="Displays a random image or GIF of a neko, waifu, husbando, kitsune, or other actions.")
 async def nekos(ctx, category):
     base_url = "https://nekos.best/api/v2/"
 
@@ -451,9 +467,7 @@ async def nekos(ctx, category):
             embed.set_image(url=image_url)
             await ctx.send(embed=embed)
 
-
 bot.remove_command("help")
-
 
 @bot.hybrid_command(name="help", description="Get all other commands!")
 async def help(ctx):
@@ -475,9 +489,5 @@ async def help(ctx):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("You do not have permission to use this command.")
-
-
-
-# keep_alive()
 
 bot.run(TOKEN)
