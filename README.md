@@ -1,6 +1,5 @@
 # Discord-Chat-bot 🤖
 
-
 This is a Python-based Discord chat bot that uses the discord.py library. It can respond to messages, change its profile picture, and provide latency information. It also utilizes the [Imaginepy](https://github.com/ItsCEED/Imaginepy) for generating midjourney like images.
 
 The bot has various features, including image generation using DALL-E, OCR for images, web access using DuckDuckGo, and YouTube video summarization. It supports hybrid command systems, recognizes mentions, handles messages, and allows for channel-specific responses.
@@ -20,6 +19,10 @@ The bot has various features, including image generation using DALL-E, OCR for i
 <details>
 <summary><strong>Feature Showcase 👀 (Click to expand)</strong></summary>
 
+# Reversed GPT4 Model (Not default)
+
+![image](https://github.com/mishalhossin/Discord-AI-Chatbot/assets/91066601/c1e09fba-b0c4-4642-9f10-16c8885fcce1)
+
 ## Image generation
   
 ![image](https://github.com/mishalhossin/Discord-AI-Chatbot/assets/91066601/3919e006-8e7b-400d-8559-9985fc2bddf4)
@@ -34,9 +37,6 @@ The bot has various features, including image generation using DALL-E, OCR for i
 ## OCR for images (Needs Hugging Face API key)
 ![image](https://github.com/mishalhossin/Discord-AI-Chatbot/assets/91066601/85f4f847-ded5-45fc-ac07-37251edfa627)
 
-
-
-
 </details>
 
 <details open>
@@ -48,7 +48,7 @@ The bot has various features, including image generation using DALL-E, OCR for i
 - [x] Mention Recognition: The bot always responds when you mention it or say its name. It's as attentive as a squirrel spotting a shiny acorn! ⚙️
 - [x] Message Handling: The bot knows when you're replying to someone else, so it won't cause confusion. It's like having a mind reader in your server! 🪄
 - [x] Channel-Specific Responses: Use the `/toggleactive` command to chill the bot in a specific channel. ⚙️
-- [x] GPT-3.5-Turbo Model: This bot runs on turbo power! Powered by the lightning-fast GPT-3.5-Turbo language model. 🤖
+- [x] GPT-4 Model: This bot runs on turbo power! Powered by the lightning-fast GPT-3.5-turbo language model. 🤖
 - [x] Image Detection Model: The bot can detect objects and text in images with OCR and GPT2 captioning using a fancy Hugging Face API. 🕵️‍♂️
 - [x] Secure Credential Management: Keep your credentials secure using environment variables. 🔑
 - [x] Web Access: Web Access is now available! Unlock a whole new level of awesomeness. 🌐
@@ -142,7 +142,7 @@ For Debian-based distributions (such as Ubuntu):
 apt update -y ; sudo apt upgrade -y; sudo apt autoremove -y; sudo apt install docker-compose -y
 ```
 <details>
-<summary><strong>Other linux distro</strong></summary>
+<summary><strong>Other linux distro (Click to expand)</strong></summary>
   
  
 For Red Hat-based distributions (such as CentOS and Fedora):
